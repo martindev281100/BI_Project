@@ -1,8 +1,11 @@
 import csv
 
 data = []
-
+seen = set()
 for row in csv.reader(open("googleplaystore.csv"), delimiter=','):
+    if row[0] in seen: continue
+
+    seen.add(row[0])
     data.append(row)
 
 # print(data)
@@ -27,6 +30,7 @@ row2 = list(map(remove_nan_rating, data))
 row5 = list(map(remove_plus, data))
 row11 = list(map(convert_num11, data))
 row12 = list(map(convert_num12, data))
+
 i = 0
 for row in data:
     row[1] = row1[i]
