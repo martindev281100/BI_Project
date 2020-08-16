@@ -1,4 +1,5 @@
 import csv
+import numpy as np
 
 data = []
 seen = set()
@@ -42,3 +43,8 @@ for row in data:
     i = i + 1
 
 print(data)
+np.savetxt('test.csv', data, fmt='%s', delimiter=',', newline='\n', encoding='utf8')
+with open('test.csv', mode='w') as csv_file:
+    writer = csv.writer(csv_file)
+    for row in data:
+        writer.writerow(row)
