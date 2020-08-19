@@ -20,7 +20,7 @@ remove_nan_rating = lambda row: row[2].replace("NaN", "0")
 remove_plus = lambda row: row[5].replace("+", "")
 remove_vdevice4 = lambda row: 0 if row[4] == "Varies with device" else (remove_sizeMk)(row)
 convert_num11 = lambda row: 1.0 if row[11] == "Varies with device" \
-    else (1.0 if row[11] == "NaN" else row[11][:3])
+    else (1.0 if row[11] == "NaN" else (row[11][:3] if row[11][:2] in '"0.""1.""2.""3.""4.""5.""6.""7.""8.""9."' else 1.0))
 convert_num12 = lambda row: 1.0 if row[12] == "Varies with device" \
     else (1.0 if row[12] == "NaN" else row[12][:3])
 
