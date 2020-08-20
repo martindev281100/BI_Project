@@ -5,45 +5,50 @@ data = []
 seen = set()
 for row in csv.reader(open("googleplaystore.csv"), delimiter=','):
     if row[0] in seen: continue
-
     seen.add(row[0])
     data.append(row)
 
-# print(data)
+# Remove header in dataset
 data = data[1:]
-remove_underline = lambda row: row[1].replace("_", " ")
 
+# Remove dash in second column
+remove_dash = list(map(lambda row: row[1].replace("_", " "), data))
+
+# Remove Various with device value, 'M' at size and convert it to bytes
 remove_sizeMk = lambda row: float(row[4].replace("M", "")) * 1000000 if row[4].find("M") != -1 \
     else float(row[4].replace("k", "")) * 1000
+remove_vdevice4 = list(map(lambda row: 0 if row[4] == "Varies with device" else (remove_sizeMk)(row), data))
 
-remove_nan_rating = lambda row: row[2].replace("NaN", "0")
-remove_plus = lambda row: row[5].replace("+", "")
-remove_vdevice4 = lambda row: 0 if row[4] == "Varies with device" else (remove_sizeMk)(row)
-convert_num11 = lambda row: 1.0 if row[11] == "Varies with device" \
-    else (1.0 if row[11] == "NaN" else (row[11][:3] if row[11][:2] in '"0.""1.""2.""3.""4.""5.""6.""7.""8.""9."' else 1.0))
-convert_num12 = lambda row: 1.0 if row[12] == "Varies with device" \
-    else (1.0 if row[12] == "NaN" else row[12][:3])
 
-# Clear underline in Category
-row1 = list(map(remove_underline, data))
-row4 = list(map(remove_vdevice4, data))
-row2 = list(map(remove_nan_rating, data))
-row5 = list(map(remove_plus, data))
-row11 = list(map(convert_num11, data))
-row12 = list(map(convert_num12, data))
+# Remove NaN value in review column
+remove_nan_rating = list(map(lambda row: row[2].replace("NaN", "0"), data))
 
+# Remove plus character in install column
+remove_plus = list(map(lambda row: row[5].replace("+", ""), data))
+
+# Remove Varies with device and *trash value in column then change to 1.0
+convert_num11 = list(map(lambda row: 1.0 if row[11] == "Varies with device" \
+    else (
+    1.0 if row[11] == "NaN" else (row[11][:3] if row[11][:2] in '"0.""1.""2.""3.""4.""5.""6.""7.""8.""9."' else 1.0)),
+                         data))
+
+# Remove Varies with device and Nan then change to 1.0
+convert_num12 = list(map(lambda row: 1.0 if row[12] == "Varies with device" \
+    else (1.0 if row[12] == "NaN" else row[12][:3]), data))
+
+# Apply function into individual row in data list
 i = 0
 for row in data:
-    row[1] = row1[i]
-    row[4] = float(row4[i])
-    row[2] = float(row2[i])
-    row[5] = float(row5[i].replace(",", ""))
-    row[11] = row11[i]
-    row[12] = row12[i]
+    row[1] = remove_dash[i]
+    row[4] = float(remove_vdevice4[i])
+    row[2] = float(remove_nan_rating[i])
+    row[5] = float(remove_plus[i].replace(",", ""))
+    row[11] = convert_num11[i]
+    row[12] = convert_num12[i]
     i = i + 1
-
 print(data)
 
+# Write data in a new csv file
 np.savetxt('test.csv', data, fmt='%s', delimiter=',', newline='\n', encoding='utf8')
 with open('test.csv', mode='w') as csv_file:
     writer = csv.writer(csv_file)
